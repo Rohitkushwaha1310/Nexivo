@@ -13,7 +13,7 @@ app = FastAPI(
 # allow frontend talk backebd 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://your-site-name.netlify.app"],
+    allow_origins=["https://charming-panda-7b74a9.netlify.app/"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
