@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard  Nexiv0 </title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- navbaar  -->
+<nav class="navbar">
+  <a href="dashboard.html" class="navbar-brand">
+    <div class="logo-icon"></div>
+    Nexivo
+  </a>
+  <div class="navbar-right">
+    <span class="nav-username" id="nav-name"></span>
+    <button class="btn-logout" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<!--  MAIN CONTENT  -->
+<div class="container">
+
+  <!-- STATS SECTION -->
+  <div class="stats-grid" id="stats-grid">
+    <div class="stat-card blue">
+      <div class="stat-label">Total Applied</div>
+      <div class="stat-value" id="stat-total">–</div>
+    </div>
+    <div class="stat-card orange">
+      <div class="stat-label">Scheduled</div>
+      <div class="stat-value" id="stat-scheduled">–</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-label">Rejected</div>
+      <div class="stat-value" id="stat-rejected">–</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-label">Selected</div>
+      <div class="stat-value" id="stat-selected">–</div>
+    </div>
+    <div class="stat-card purple">
+      <div class="stat-label">Success Rate</div>
+      <div class="stat-value" id="stat-rate">–</div>
+    </div>
+  </div>
+
+  <!-- APPLICATIONS TABLE -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">Applications</div>
+      <div class="page-subtitle">Track every company you have applied to</div>
+    </div>
+    <button class="btn btn-primary" onclick="openAddModal()">+ Add Application</button>
+  </div>
+
+  <div id="alert-main" class="alert"></div>
+
+  <div id="app-container">
+    <div class="empty-state">
+      <div class="icon">📋</div>
+      <h3>No applications yet</h3>
+      <p>Click "Add Application" to get started</p>
+    </div>
+  </div>
+
+  <!-- WEAKNESS ANALYZER SECTION -->
+  <div style="margin-top: 2.5rem;">
+    <div class="section-title"> Weakness Analyzer</div>
+    <div class="card">
+      <p style="font-size:0.88rem; color:var(--text-mid); margin-bottom:0.5rem;">
+        Based on your interview feedback, these are your detected weak areas:
+      </p>
+      <div id="weakness-container">
+        <span class="text-muted">No weaknesses detected yet. Add interview round feedback to analyze.</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!--ADD APPLICATION -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add Application</div>
+      <button class="modal-close" onclick="closeModal('add-modal')">✕</button>
+    </div>
+    <div id="alert-add" class="alert"></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Company Name</label>
+        <input type="text" id="add-company" placeholder="e.g. Google" />
+      </div>
+      <div class="form-group">
+        <label>Job Role</label>
+        <input type="text" id="add-role" placeholder="e.g. Backend Intern" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Status</label>
+      <select id="add-status">
+        <option>Applied</option>
+        <option>Interview Scheduled</option>
+        <option>Rejected</option>
+        <option>Selected/Offer</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Notes (optional)</label>
+      <textarea id="add-notes" placeholder="Any notes about this application..."></textarea>
+    </div>
+    <div style="display:flex; gap:8px; justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="closeModal('add-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="handleAddApplication()">Save Application</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT APPLICATIO-->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Edit Application</div>
+      <button class="modal-close" onclick="closeModal('edit-modal')">✕</button>
+    </div>
+    <input type="hidden" id="edit-app-id" />
+    <div class="form-row">
+      <div class="form-group">
+        <label>Company Name</label>
+        <input type="text" id="edit-company" />
+      </div>
+      <div class="form-group">
+        <label>Job Role</label>
+        <input type="text" id="edit-role" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Status</label>
+      <select id="edit-status">
+        <option>Applied</option>
+        <option>Interview Scheduled</option>
+        <option>Rejected</option>
+        <option>Selected/Offer</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea id="edit-notes"></textarea>
+    </div>
+    <div style="display:flex; gap:8px; justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="closeModal('edit-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="handleEditApplication()">Update</button>
+    </div>
+  </div>
+</div>
+
+<!--INTERVIEW ROUND-->
+<div class="modal-overlay" id="rounds-modal">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-header">
+      <div class="modal-title" id="rounds-modal-title">Interview Rounds</div>
+      <button class="modal-close" onclick="closeModal('rounds-modal')">✕</button>
+    </div>
+    <input type="hidden" id="current-app-id" />
+
+    <!-- Add Round Form -->
+    <div class="card" style="margin-bottom:1.2rem; background:var(--bg);">
+      <div class="section-title" style="margin-bottom:0.8rem;">➕ Add Round</div>
+      <div id="alert-round" class="alert"></div>
+      <div class="form-group">
+        <label>Round Name</label>
+        <input type="text" id="round-name" placeholder="e.g. DSA Round, HR Round" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Result</label>
+          <select id="round-result">
+            <option>Pending</option>
+            <option>Passed</option>
+            <option>Failed</option>
+            <option>On Hold</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Feedback</label>
+        <textarea id="round-feedback" placeholder="What happened? What was weak? e.g. weak in graphs, dynamic programming..."></textarea>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="handleAddRound()">Add Round</button>
+    </div>
+
+    <! Rounds List >
+    <div class="section-title">📋 All Rounds</div>
+    <div id="rounds-list">
+      <div class="empty-state" style="padding:2rem;">
+        <div class="icon">🔄</div>
+        <p>No rounds added yet</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+  // Guard: if not logged in, redirect
+  if (!isLoggedIn()) window.location.href = "index.html";
+
+  // Show username in navbar
+  document.getElementById("nav-name").textContent = `👤 ${getUserName()}`;
+
+  //  LOAD EVERYTHING ON PAGE LOAD 
+  window.onload = async function () {
+    await loadStats();
+    await loadApplications();
+    await loadWeaknesses();
+  };
+
+  //  LOAD STATS 
+  async function loadStats() {
+    const stats = await getDashboardStats();
+    document.getElementById("stat-total").textContent = stats.total_applications;
+    document.getElementById("stat-scheduled").textContent = stats.interview_scheduled;
+    document.getElementById("stat-rejected").textContent = stats.rejected;
+    document.getElementById("stat-selected").textContent = stats.selected;
+    document.getElementById("stat-rate").textContent = stats.success_rate + "%";
+  }
+
+  //  LOAD App table 
+  async function loadApplications() {
+    const apps = await getApplications();
+    const container = document.getElementById("app-container");
+
+    if (!apps.length) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">📋</div>
+          <h3>No applications yet</h3>
+          <p>Click "Add Application" to get started</p>
+        </div>`;
+      return;
+    }
+
+    let rows = apps.map(app => `
+      <tr>
+        <td><strong>${app.company_name}</strong></td>
+        <td>${app.job_role}</td>
+        <td>${getStatusBadge(app.status)}</td>
+        <td>${formatDate(app.date_applied)}</td>
+        <td>${app.notes || '<span class="text-muted">—</span>'}</td>
+        <td>
+          <div class="actions">
+            <button class="btn btn-sm btn-ghost" onclick="openRoundsModal(${app.id}, '${app.company_name}')">Rounds</button>
+            <button class="btn btn-sm btn-ghost" onclick="openEditModal(${app.id}, '${app.company_name}', '${app.job_role}', '${app.status}', '${app.notes || ''}')">Edit</button>
+            <button class="btn btn-sm btn-danger" onclick="handleDelete(${app.id})">Delete</button>
+          </div>
+        </td>
+      </tr>
+    `).join("");
+
+    container.innerHTML = `
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Date Applied</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }
+
+  //  LOAD WEAKNESSES 
+  async function loadWeaknesses() {
+    const weaknesses = await getWeaknesses();
+    const container = document.getElementById("weakness-container");
+
+    if (!weaknesses.length) {
+      container.innerHTML = `<span class="text-muted">No weaknesses detected yet. Add interview round feedback to analyze.</span>`;
+      return;
+    }
+
+    // 
+    const uniqueTopics = [...new Set(weaknesses.map(w => w.topic))];
+    container.innerHTML = `<div class="weakness-tags">${uniqueTopics.map(t => `<span class="weakness-tag">⚠️ ${t}</span>`).join("")}</div>`;
+  }
+
+  //  ADD APP 
+  function openAddModal() {
+    document.getElementById("add-company").value = "";
+    document.getElementById("add-role").value = "";
+    document.getElementById("add-status").value = "Applied";
+    document.getElementById("add-notes").value = "";
+    document.getElementById("add-modal").classList.add("active");
+  }
+
+  async function handleAddApplication() {
+    const company_name = document.getElementById("add-company").value.trim();
+    const job_role = document.getElementById("add-role").value.trim();
+    const status = document.getElementById("add-status").value;
+    const notes = document.getElementById("add-notes").value.trim();
+
+    if (!company_name || !job_role) {
+      showAlert("alert-add", "Company name and job role are required.");
+      return;
+    }
+
+    const data = await createApplication({ company_name, job_role, status, notes });
+    if (data.detail) {
+      showAlert("alert-add", data.detail);
+    } else {
+      closeModal("add-modal");
+      await loadApplications();
+      await loadStats();
+    }
+  }
+
+  //  EDIT APPLI
+  function openEditModal(id, company, role, status, notes) {
+    document.getElementById("edit-app-id").value = id;
+    document.getElementById("edit-company").value = company;
+    document.getElementById("edit-role").value = role;
+    document.getElementById("edit-status").value = status;
+    document.getElementById("edit-notes").value = notes;
+    document.getElementById("edit-modal").classList.add("active");
+  }
+
+  async function handleEditApplication() {
+    const id = document.getElementById("edit-app-id").value;
+    const company_name = document.getElementById("edit-company").value.trim();
+    const job_role = document.getElementById("edit-role").value.trim();
+    const status = document.getElementById("edit-status").value;
+    const notes = document.getElementById("edit-notes").value.trim();
+
+    const data = await updateApplication(id, { company_name, job_role, status, notes });
+    if (data.detail) {
+      showAlert("alert-main", data.detail);
+    } else {
+      closeModal("edit-modal");
+      await loadApplications();
+      await loadStats();
+    }
+  }
+
+  
+  async function handleDelete(id) {
+    if (!confirm("Delete this application and all its rounds?")) return;
+    await deleteApplication(id);
+    await loadApplications();
+    await loadStats();
+    await loadWeaknesses();
+  }
+
+
+  async function openRoundsModal(appId, companyName) {
+    document.getElementById("current-app-id").value = appId;
+    document.getElementById("rounds-modal-title").textContent = `Rounds – ${companyName}`;
+    document.getElementById("rounds-modal").classList.add("active");
+    document.getElementById("round-name").value = "";
+    document.getElementById("round-feedback").value = "";
+    document.getElementById("round-result").value = "Pending";
+    await loadRounds(appId);
+  }
+
+  async function loadRounds(appId) {
+    const rounds = await getRounds(appId);
+    const container = document.getElementById("rounds-list");
+
+    if (!rounds.length) {
+      container.innerHTML = `<div class="empty-state" style="padding:1.5rem;"><p>No rounds added yet</p></div>`;
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr><th>Round</th><th>Result</th><th>Feedback</th><th>Date</th><th></th></tr>
+          </thead>
+          <tbody>
+            ${rounds.map(r => `
+              <tr>
+                <td><strong>${r.round_name}</strong></td>
+                <td>${getResultBadge(r.result)}</td>
+                <td style="max-width:200px;">${r.feedback || '<span class="text-muted">—</span>'}</td>
+                <td>${formatDate(r.interview_date)}</td>
+                <td>
+                  <button class="btn btn-sm btn-danger" onclick="handleDeleteRound(${r.id})">✕</button>
+                </td>
+              </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>`;
+  }
+
+  async function handleAddRound() {
+    const appId = document.getElementById("current-app-id").value;
+    const round_name = document.getElementById("round-name").value.trim();
+    const feedback = document.getElementById("round-feedback").value.trim();
+    const result = document.getElementById("round-result").value;
+
+    if (!round_name) {
+      showAlert("alert-round", "Round name is required.");
+      return;
+    }
+
+    const data = await createRound(appId, { round_name, feedback, result });
+    if (data.detail) {
+      showAlert("alert-round", data.detail);
+    } else {
+      document.getElementById("round-name").value = "";
+      document.getElementById("round-feedback").value = "";
+      document.getElementById("round-result").value = "Pending";
+      await loadRounds(appId);
+      await loadWeaknesses(); // for refreshing 
+    }
+  }
+
+  async function handleDeleteRound(roundId) {
+    if (!confirm("Delete this round?")) return;
+    const appId = document.getElementById("current-app-id").value;
+    await deleteRound(roundId);
+    await loadRounds(appId);
+  }
+
+ 
+  function openModal(id) {
+    document.getElementById(id).classList.add("active");
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove("active");
+  }
+
+  // Close modal on overlay click
+  document.querySelectorAll(".modal-overlay").forEach(overlay => {
+    overlay.addEventListener("click", function (e) {
+      if (e.target === this) this.classList.remove("active");
+    });
+  });
+</script>
+</body>
+</html>

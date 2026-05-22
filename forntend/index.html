@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nexivo - Login</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="auth-page">
+  <div class="auth-card">
+
+    <div class="auth-logo">
+      <div class="icon"></div>
+      <h1>Nexivo</h1>
+      <p>Your personal interview management system</p>
+    </div>
+
+   
+    <div id="alert-box" class="alert"></div>
+
+    
+    <div id="login-section">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="you@example.com" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="Your password" />
+      </div>
+      <button class="btn btn-primary" style="width:100%;" onclick="handleLogin()">
+        Login →
+      </button>
+      <div class="auth-footer">
+        Don't have an account? <a href="#" onclick="toggleForm()">Sign up</a>
+      </div>
+    </div>
+
+  <!-- sign up  -->
+    <div id="signup-section" style="display:none;">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="signup-name" placeholder="Your name" />
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="signup-email" placeholder="you@example.com" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="signup-password" placeholder="Choose a password" />
+      </div>
+      <button class="btn btn-primary" style="width:100%;" onclick="handleSignup()">
+        Create Account →
+      </button>
+      <div class="auth-footer">
+        Already have an account? <a href="#" onclick="toggleForm()">Login</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+  // already log in then dashboard
+  
+  if (isLoggedIn()) window.location.href = "dashboard.html";
+
+  function toggleForm() {
+    const login = document.getElementById("login-section");
+    const signup = document.getElementById("signup-section");
+    login.style.display = login.style.display === "none" ? "block" : "none";
+    signup.style.display = signup.style.display === "none" ? "block" : "none";
+  }
+
+  async function handleLogin() {
+    const email = document.getElementById("login-email").value.trim();
+    const password = document.getElementById("login-password").value.trim();
+
+    if (!email || !password) {
+      showAlert("alert-box", "Please fill in all fields.");
+      return;
+    }
+
+    const data = await login(email, password);
+
+    if (data.detail) {
+      showAlert("alert-box", data.detail);
+    } else {
+      // Save user info to localStorage
+      localStorage.setItem("user_id", data.user_id);
+      localStorage.setItem("user_name", data.user_name);
+      window.location.href = "dashboard.html";
+    }
+  }
+
+  async function handleSignup() {
+    const name = document.getElementById("signup-name").value.trim();
+    const email = document.getElementById("signup-email").value.trim();
+    const password = document.getElementById("signup-password").value.trim();
+
+    if (!name || !email || !password) {
+      showAlert("alert-box", "Please fill in all fields.");
+      return;
+    }
+
+    const data = await signup(name, email, password);
+
+    if (data.detail) {
+      showAlert("alert-box", data.detail);
+    } else {
+      showAlert("alert-box", "Account created! Please login.", "success");
+      toggleForm();
+    }
+  }
+</script>
+</body>
+</html>
