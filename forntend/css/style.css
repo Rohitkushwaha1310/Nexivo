@@ -3,9 +3,9 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
 :root {
-  --primary: #2563eb;
+  --primary: #7950d2;
   --primary-light: #eff6ff;
-  --primary-dark: #1d4ed8;
+  --primary-dark: #1dd893;
   --success: #16a34a;
   --success-light: #f0fdf4;
   --danger: #dc2626;
