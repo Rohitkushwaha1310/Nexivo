@@ -1,6 +1,6 @@
 
 
-const BASE_URL = "https://nexivo-kzn8.onrender.com/"; 
+const BASE_URL = "https://nexivo-kzn8.onrender.com"; 
 
 
 function getUserId() {
